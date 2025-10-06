@@ -24,6 +24,7 @@ var (
 	rssWidgetDetailedListTemplate     = mustParseTemplate("rss-detailed-list.html", "widget-base.html")
 	rssWidgetHorizontalCardsTemplate  = mustParseTemplate("rss-horizontal-cards.html", "widget-base.html")
 	rssWidgetHorizontalCards2Template = mustParseTemplate("rss-horizontal-cards-2.html", "widget-base.html")
+	imgSrcPattern                     = regexp.MustCompile(`<img[^>]+src=["']([^"']+)["']`)
 )
 
 var feedParser = gofeed.NewParser()
@@ -148,6 +149,32 @@ func (f rssFeedItemList) sortByNewest() rssFeedItemList {
 	})
 
 	return f
+}
+
+// extractFirstImageFromHTML extracts the first image URL from HTML content
+func extractFirstImageFromHTML(htmlContent string) string {
+	matches := imgSrcPattern.FindStringSubmatch(htmlContent)
+	if len(matches) > 1 {
+		return matches[1]
+	}
+	return ""
+}
+
+// extractTextFromHTML removes HTML tags and extracts text content
+func extractTextFromHTML(htmlContent string) string {
+	// Remove image tags completely first
+	text := regexp.MustCompile(`<img[^>]*>`).ReplaceAllString(htmlContent, "")
+	// Remove figure tags
+	text = regexp.MustCompile(`</?figure[^>]*>`).ReplaceAllString(text, "")
+	// Remove figcaption tags
+	text = regexp.MustCompile(`</?figcaption[^>]*>`).ReplaceAllString(text, "")
+	// Now remove all other HTML tags
+	text = htmlTagsWithAttributesPattern.ReplaceAllString(text, "")
+	// Clean up whitespace
+	text = sequentialWhitespacePattern.ReplaceAllString(text, " ")
+	text = strings.TrimSpace(text)
+	text = html.UnescapeString(text)
+	return text
 }
 
 func (widget *rssWidget) fetchItemsFromFeeds() (rssFeedItemList, error) {
@@ -282,7 +309,19 @@ func (widget *rssWidget) fetchItemsFromFeedTask(request rssFeedRequest) ([]rssFe
 
 		if request.IsDetailed {
 			if !request.HideDescription && item.Description != "" && item.Title != "" {
-				rssItem.Description = shortenFeedDescriptionLen(item.Description, 200)
+				// First try to get text from content if available
+				var descText string
+				if item.Content != "" {
+					descText = extractTextFromHTML(item.Content)
+				}
+				// Fallback to description if content is empty or too short
+				if descText == "" || len(descText) < 50 {
+					descText = extractTextFromHTML(item.Description)
+				}
+				// Only use if we have actual text content
+				if descText != "" {
+					rssItem.Description = shortenFeedDescriptionLen(descText, 200)
+				}
 			}
 
 			if !request.HideCategories {
@@ -310,10 +349,17 @@ func (widget *rssWidget) fetchItemsFromFeedTask(request rssFeedRequest) ([]rssFe
 			rssItem.ChannelName = feed.Title
 		}
 
+		// Try to find image in various places
 		if item.Image != nil {
 			rssItem.ImageURL = item.Image.URL
 		} else if url := findThumbnailInItemExtensions(item); url != "" {
 			rssItem.ImageURL = url
+		} else if imgURL := extractFirstImageFromHTML(item.Content); imgURL != "" {
+			// Try to extract from content:encoded
+			rssItem.ImageURL = imgURL
+		} else if imgURL := extractFirstImageFromHTML(item.Description); imgURL != "" {
+			// Try to extract from description
+			rssItem.ImageURL = imgURL
 		} else if feed.Image != nil {
 			if len(feed.Image.URL) > 0 && feed.Image.URL[0] == '/' {
 				rssItem.ImageURL = strings.TrimRight(feed.Link, "/") + feed.Image.URL
