@@ -771,6 +771,7 @@ Example:
 | preserve-order | bool | no | false |
 | single-line-titles | boolean | no | false |
 | collapse-after | integer | no | 5 |
+| hide-images | boolean | no | false |
 
 ##### `limit`
 The maximum number of articles to show.
@@ -815,6 +816,9 @@ Used to modify the height of the thumbnails. Works only when the style is set to
 
 ##### `card-height`
 Used to modify the height of cards when using the `horizontal-cards-2` style. The default value is `27` and the units are `rem`.
+
+##### `hide-images`
+When set to `true`, suppresses the display of images in the RSS widget. This applies to all styles that show images (`detailed-list`, `horizontal-cards`, and `horizontal-cards-2`). The `vertical-list` style does not display images by default.
 
 ##### `feeds`
 An array of RSS/atom feeds. The title can optionally be changed.

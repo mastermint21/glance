@@ -38,6 +38,7 @@ type rssWidget struct {
 	CollapseAfter    int              `yaml:"collapse-after"`
 	SingleLineTitles bool             `yaml:"single-line-titles"`
 	PreserveOrder    bool             `yaml:"preserve-order"`
+	HideImages       bool             `yaml:"hide-images"`
 
 	Items          rssFeedItemList `yaml:"-"`
 	NoItemsMessage string          `yaml:"-"`
