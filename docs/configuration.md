@@ -771,12 +771,16 @@ Example:
 | preserve-order | bool | no | false |
 | single-line-titles | boolean | no | false |
 | collapse-after | integer | no | 5 |
+| hide-images | boolean | no | false |
 
 ##### `limit`
 The maximum number of articles to show.
 
 ##### `collapse-after`
 How many articles are visible before the "SHOW MORE" button appears. Set to `-1` to never collapse.
+
+##### `hide-images`
+When set to `true`, suppresses the display of images/thumbnails in the RSS feed items. Currently only applies to the `detailed-list` style.
 
 ##### `preserve-order`
 When set to `true`, the order of the articles will be preserved as they are in the feeds. Useful if a feed uses its own sorting order which denotes the importance of the articles. If you use this property while having a lot of feeds, it's recommended to set a `limit` to each individual feed since if the first defined feed has 15 articles, the articles from the second feed will start after the 15th article in the list.
