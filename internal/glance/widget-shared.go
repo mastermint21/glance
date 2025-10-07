@@ -23,6 +23,7 @@ type forumPost struct {
 	TimePosted      time.Time
 	Tags            []string
 	IsCrosspost     bool
+	ImageUrl        string
 }
 
 type forumPostList []forumPost
