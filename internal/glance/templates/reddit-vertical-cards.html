@@ -8,7 +8,13 @@
     <div class="widget-content-frame relative">
         {{ if ne "" .ThumbnailUrl }}
         <div class="reddit-card-thumbnail-container">
+            {{ if ne "" .ImageUrl }}
+            <a href="{{ .ImageUrl }}" target="_blank" rel="noreferrer">
+                <img class="reddit-card-thumbnail" loading="lazy" src="{{ .ThumbnailUrl }}" alt="">
+            </a>
+            {{ else }}
             <img class="reddit-card-thumbnail" loading="lazy" src="{{ .ThumbnailUrl }}" alt="">
+            {{ end }}
         </div>
         {{ end }}
         <div class="padding-widget relative">
