@@ -139,6 +139,8 @@ type subredditResponseJson struct {
 				IsSelf        bool    `json:"is_self"`
 				Thumbnail     string  `json:"thumbnail"`
 				Flair         string  `json:"link_flair_text"`
+				UrlOverriddenByDest string `json:"url_overridden_by_dest"`
+    			PostHint      string  `json:"post_hint"`
 				ParentList    []struct {
 					Id        string `json:"id"`
 					Subreddit string `json:"subreddit"`
@@ -249,6 +251,11 @@ func (widget *redditWidget) fetchSubredditPosts() (forumPostList, error) {
 
 		if post.Thumbnail != "" && post.Thumbnail != "self" && post.Thumbnail != "default" && post.Thumbnail != "nsfw" {
 			forumPost.ThumbnailUrl = html.UnescapeString(post.Thumbnail)
+		    if post.PostHint == "image" && post.UrlOverriddenByDest != "" {
+  				forumPost.ImageUrl = html.UnescapeString(post.UrlOverriddenByDest)
+			} else if post.PostHint == "image" && post.Url != "" {
+				forumPost.ImageUrl = html.UnescapeString(post.Url)
+    		}
 		}
 
 		if !post.IsSelf {
